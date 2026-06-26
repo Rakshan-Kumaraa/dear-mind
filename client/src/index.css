@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Default Theme: Midnight Black */
+:root, :root[data-theme="midnight-black"] {
+  --bg-wallpaper: url('/wallpapers/midnight-black.jpg');
+  --bg-gradient-start: #000000;
+  --bg-gradient-end: #10002b; /* Dark purple gradient as requested */
+  --accent-start: #3c096c;
+  --accent-end: #5a189a;
+  --text-main: #ffffff;
+}
+
+:root[data-theme="bubblegum"] {
+  --bg-wallpaper: url('/wallpapers/bubblegum.jpg');
+  --bg-gradient-start: #e7c6ff;
+  --bg-gradient-end: #fdc5f5;
+  --accent-start: #b388eb;
+  --accent-end: #f7aef8;
+  --text-main: #ffffff;
+}
+
+:root[data-theme="deep-forest"] {
+  --bg-wallpaper: url('/wallpapers/deep-forest.jpg');
+  --bg-gradient-start: #283618;
+  --bg-gradient-end: #386641;
+  --accent-start: #6a994e;
+  --accent-end: #538d22;
+  --text-main: #ffffff;
+}
+
+:root[data-theme="summer-beach"] {
+  --bg-wallpaper: url('/wallpapers/summer-beach.jpg');
+  --bg-gradient-start: #ff5400;
+  --bg-gradient-end: #ff8500;
+  --accent-start: #ff9e00;
+  --accent-end: #ffaa00;
+  --text-main: #ffffff;
+}
+
+:root[data-theme="cosmic-nebula"] {
+  --bg-wallpaper: url('/wallpapers/cosmic-nebula.jpg');
+  --bg-gradient-start: #10002b;
+  --bg-gradient-end: #240046;
+  --accent-start: #7b2cbf;
+  --accent-end: #9d4edd;
+  --text-main: #ffffff;
+}
+
+/* Liquid Glass Utilities */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-text {
+  background: linear-gradient(to right, var(--accent-start), var(--accent-end));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+/* Add this below your glass-panel utilities */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
