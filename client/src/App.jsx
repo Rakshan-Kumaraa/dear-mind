@@ -187,6 +187,7 @@ function App() {
           isOpen={isSidebarOpen} 
           onClose={() => setIsSidebarOpen(false)} 
           onLogout={handleLogout}
+          entries={entries} {/* <--- Add this exact line right here! */}
         />
         
       </div>

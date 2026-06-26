@@ -4,37 +4,34 @@ import {
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signInWithPopup, 
-  updateProfile // NEW: Allows us to save the username to the account
+  updateProfile,
+  sendPasswordResetEmail
 } from 'firebase/auth';
 
 export default function Login({ onLoginSuccess }) {
   const [isRegistering, setIsRegistering] = useState(false);
-  const [username, setUsername] = useState(''); // NEW STATE
+  const [username, setUsername] = useState(''); 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState(''); // NEW STATE
-  const [error, setError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); 
+  const [message, setMessage] = useState({ type: '', text: '' }); // Handles both errors and success messages
 
   const handleEmailAuth = async (e) => {
     e.preventDefault();
-    setError('');
+    setMessage({ type: '', text: '' });
     
     try {
       if (isRegistering) {
-        // NEW: Validation checks before sending to Firebase
         if (!username.trim()) {
-          setError("Please enter a username.");
+          setMessage({ type: 'error', text: "Please enter a username." });
           return;
         }
         if (password !== confirmPassword) {
-          setError("Passwords do not match.");
+          setMessage({ type: 'error', text: "Passwords do not match." });
           return;
         }
 
-        // Create the user
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        
-        // Save the username to their new Firebase profile
         await updateProfile(userCredential.user, { displayName: username });
         
       } else {
@@ -43,7 +40,7 @@ export default function Login({ onLoginSuccess }) {
       onLoginSuccess();
     } catch (err) {
       console.error("Firebase Email Auth Error:", err);
-      setError(err.message.replace('Firebase: ', ''));
+      setMessage({ type: 'error', text: err.message.replace('Firebase: ', '') });
     }
   };
 
@@ -53,7 +50,20 @@ export default function Login({ onLoginSuccess }) {
       onLoginSuccess();
     } catch (err) {
       console.error("Firebase Google Auth Error:", err);
-      setError(err.message.replace('Firebase: ', ''));
+      setMessage({ type: 'error', text: err.message.replace('Firebase: ', '') });
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setMessage({ type: 'error', text: "Please type your email into the box first." });
+      return;
+    }
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage({ type: 'success', text: "Success! Check your inbox for a password reset link." });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message.replace('Firebase: ', '') });
     }
   };
 
@@ -64,14 +74,14 @@ export default function Login({ onLoginSuccess }) {
         {isRegistering ? 'Create your Vault' : 'Unlock your Vault'}
       </h2>
       
-      {error && (
-        <div className="bg-red-500/20 text-red-200 p-3 rounded-lg w-full text-sm mb-4 border border-red-500/30 text-center font-medium">
-          {error}
+      {/* Dynamic Message Box for Errors and Successes */}
+      {message.text && (
+        <div className={`p-3 rounded-lg w-full text-sm mb-4 text-center font-medium border ${message.type === 'error' ? 'bg-red-500/20 text-red-200 border-red-500/30' : 'bg-green-500/20 text-green-200 border-green-500/30'}`}>
+          {message.text}
         </div>
       )}
 
       <form onSubmit={handleEmailAuth} className="w-full space-y-4">
-        {/* Conditionally render Username only during registration */}
         {isRegistering && (
           <input 
             type="text" placeholder="Username" required
@@ -92,7 +102,6 @@ export default function Login({ onLoginSuccess }) {
           value={password} onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Conditionally render Confirm Password only during registration */}
         {isRegistering && (
           <input 
             type="password" placeholder="Confirm Password" required
@@ -104,6 +113,17 @@ export default function Login({ onLoginSuccess }) {
         <button type="submit" className="w-full py-3 rounded-xl bg-gradient-to-r from-[var(--accent-start)] to-[var(--accent-end)] text-white font-bold transition-all shadow-lg hover:opacity-90 mt-2">
           {isRegistering ? 'Sign Up' : 'Enter Vault'}
         </button>
+
+        {/* The Forgot Password Button */}
+        {!isRegistering && (
+          <button 
+            type="button" 
+            onClick={handleForgotPassword}
+            className="w-full text-center text-sm text-white/50 hover:text-white mt-2 transition-colors"
+          >
+            Forgot your password?
+          </button>
+        )}
       </form>
 
       <div className="flex items-center w-full my-6 gap-4 opacity-50">

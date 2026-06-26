@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeSelector from './ThemeSelector';
 
-export default function Sidebar({ isOpen, onClose, onLogout }) {
+// NEW: We are passing 'entries' into the Sidebar so we can export them
+export default function Sidebar({ isOpen, onClose, onLogout, entries }) {
   const [showLockPrompt, setShowLockPrompt] = useState(false);
 
   const handleConfirmLock = () => {
@@ -11,9 +12,56 @@ export default function Sidebar({ isOpen, onClose, onLogout }) {
     onLogout();
   };
 
+  // NEW: The Data Export Logic
+  const handleExportData = () => {
+    if (!entries || Object.keys(entries).length === 0) {
+      alert("Your vault is currently empty!");
+      return;
+    }
+
+    let fileContent = "DEAR MIND - VAULT EXPORT\n";
+    fileContent += `Exported on: ${new Date().toLocaleDateString()}\n`;
+    fileContent += "=========================================\n\n";
+
+    // Loop through all saved dates and format them neatly
+    Object.keys(entries).sort().forEach(dateKey => {
+      const entry = entries[dateKey];
+      fileContent += `DATE: ${dateKey}\n`;
+      fileContent += `-----------------------------------------\n`;
+      
+      // If there's text content, add it. (Adjust 'entry.text' based on how you saved it in StoryEditor)
+      if (entry.text || entry.content) {
+        fileContent += `${entry.text || entry.content}\n`;
+      } else {
+        fileContent += `[No written text for this entry]\n`;
+      }
+      
+      // If there's an audio log URL, include it
+      if (entry.audioUrl) {
+        fileContent += `\n[Audio Log Included: ${entry.audioUrl}]\n`;
+      }
+      
+      fileContent += "\n=========================================\n\n";
+    });
+
+    // Create the downloadable text file
+    const blob = new Blob([fileContent], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    
+    // Trigger the download
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "Dear_Mind_Backup.txt";
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <>
-      {/* Main Settings Sidebar */}
       <AnimatePresence>
         {isOpen && (
           <>
@@ -38,6 +86,20 @@ export default function Sidebar({ isOpen, onClose, onLogout }) {
                   <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Appearance</h3>
                   <ThemeSelector />
                 </div>
+                
+                {/* NEW: Data Export Section */}
+                <div className="mb-8 pt-6 border-t border-white/10">
+                  <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wider mb-4">Your Data</h3>
+                  <p className="text-xs text-white/40 mb-3 leading-relaxed">
+                    Download a complete, offline text copy of all your journal entries. Your thoughts belong to you.
+                  </p>
+                  <button 
+                    onClick={handleExportData}
+                    className="w-full py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white transition-all border border-white/10 flex items-center justify-center gap-2 text-sm font-medium"
+                  >
+                    📥 Download My Diary
+                  </button>
+                </div>
               </div>
 
               <div className="mt-auto pt-6 border-t border-white/10">
@@ -48,7 +110,6 @@ export default function Sidebar({ isOpen, onClose, onLogout }) {
                   Logout
                 </button>
 
-                {/* NEW: Developer Credits & LinkedIn Button */}
                 <div className="mt-8 flex flex-col items-center justify-center text-white/40 text-[11px] uppercase tracking-widest space-y-1">
                   <p>Version 3.42</p>
                   <p>Developed by</p>
@@ -73,7 +134,6 @@ export default function Sidebar({ isOpen, onClose, onLogout }) {
         )}
       </AnimatePresence>
 
-      {/* Logout / Lock Vault Confirmation Modal */}
       <AnimatePresence>
         {showLockPrompt && (
           <motion.div 
